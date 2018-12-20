@@ -191,7 +191,7 @@ class Riff(object):
                 self.cur_idx = 0
                 self.cur_octave += 1
 
-        new_note = self.key + 12*self.cur_octave + self.scale[self.cur_idx]
+        new_note = self.key + 12*self.cur_octave + self.scale[int(self.cur_idx)]
         self.last_note = new_note
         self.add_note(new_note)
 
@@ -220,7 +220,7 @@ class Riff(object):
                 self.cur_idx = 0
                 self.cur_octave += 1
 
-            new_note = self.key + 12*self.cur_octave + self.scale[self.cur_idx]
+            new_note = self.key + 12*self.cur_octave + self.scale[int(self.cur_idx)]
             self.last_note = new_note
             self.add_note(new_note)
 
@@ -493,9 +493,9 @@ class Song(object):
 
             if enables[0]:
                 reseed = False
-                if rd.random <= 0.4:
+                if rd.random() <= 0.4:
                     reseed = True
-                    ls = [None, None, None, None]
+                    ls = [lead_instrument, None, None, None]
                 ls = self.lead_line(t_init=self.double_time*(i+1), seed = ls)
 
                 while ls[0] == self.noise:
@@ -509,13 +509,13 @@ class Song(object):
             if enables[2]:
                 self.bassline(t_init=self.double_time*(i+1))
             if enables[3]:
-                self.comping(t_init=self.double_time*(i+1))
+                self.comping(t_init=self.double_time*(i+1), seed=[None, comp_instrument, None, None, None])
 
 
         self.sample.write_to_file("test.wav")
 
-        print('Sample "test.wav" had been generated.')
-        print("Time to generate: %s" % (time.time() - now))
+        #print('Sample "test.wav" had been generated.')
+        #print("Time to generate: %s" % (time.time() - now))
 
 
 

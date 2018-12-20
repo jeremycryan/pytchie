@@ -2,7 +2,7 @@
 
 from math import sin, pi
 import random as rd
-import scipy.io.wavfile as wv
+import wave as wv
 import numpy as np
 import os
 from constants import *
@@ -248,13 +248,21 @@ class Sample(object):
 
     def get_data_as_array(self):
         maximum = max([abs(i) for i in self.data])
-        self.data = [i*1.0/maximum for i in self.data]
+        self.data = [int(i*1.0*32767/maximum) for i in self.data]
 
-        return np.asarray(self.data).astype(np.float32)
+        return np.asarray(self.data).astype(np.int16)
 
     def write_to_file(self, filename):
         data = self.get_data_as_array()
-        wv.write(fp(os.path.join("output", filename)), SAMPLE_RATE, data)
+        path = fp(os.path.join("output", filename))
+        wavefile = wv.open(path, mode="wb")
+        wavefile.setnchannels(1)
+        wavefile.setsampwidth(2)
+        wavefile.setframerate(SAMPLE_RATE)
+        wavefile.writeframes(data)
+        wavefile.close()
+        #import scipy.io.wavfile as wv
+        #wv.write(fp(os.path.join("output", filename)), SAMPLE_RATE, data)
 
 
 if __name__ == '__main__':
