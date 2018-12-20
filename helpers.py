@@ -8,7 +8,7 @@ def midi_to_freq(num):
     freq = 440 * 2**(num_a / 12.0)
     return freq
 
-def fp(path):
+def fp(relative):
     if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative)
     return os.path.join(relative)

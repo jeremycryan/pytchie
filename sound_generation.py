@@ -6,6 +6,7 @@ import scipy.io.wavfile as wv
 import numpy as np
 import os
 from constants import *
+from helpers import *
 
 ################################################################################
 # ------------------------ ENVELOPE OBJECT ----------------------------------- #
@@ -253,7 +254,7 @@ class Sample(object):
 
     def write_to_file(self, filename):
         data = self.get_data_as_array()
-        wv.write(fp(filename), SAMPLE_RATE, data)
+        wv.write(fp(os.path.join("output", filename)), SAMPLE_RATE, data)
 
 
 if __name__ == '__main__':
