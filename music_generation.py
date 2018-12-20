@@ -493,7 +493,7 @@ class Song(object):
 
             if enables[0]:
                 reseed = False
-                if rd.random <= 0.3:
+                if rd.random <= 0.4:
                     reseed = True
                     ls = [None, None, None, None]
                 ls = self.lead_line(t_init=self.double_time*(i+1), seed = ls)
@@ -501,7 +501,7 @@ class Song(object):
                 while ls[0] == self.noise:
                     ls[0] = rd.choice(self.instruments)
 
-                if rd.random() < 0.5 and not reseed:
+                if rd.random() < 0.6 and not reseed:
                     self.lead_line(t_init=self.double_time*(i+1), seed = ls[:-2] + [None] + [ls[2]])
 
             if enables[1]:
@@ -510,6 +510,7 @@ class Song(object):
                 self.bassline(t_init=self.double_time*(i+1))
             if enables[3]:
                 self.comping(t_init=self.double_time*(i+1))
+
 
         self.sample.write_to_file("test.wav")
 

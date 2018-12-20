@@ -23,7 +23,7 @@ class MusGUI(object):
         pygame.font.init()
         self.screen_commit = pygame.display.set_mode(WINDOW_SIZE)
         self.screen = pygame.Surface(FRAME_SIZE)
-        pygame.display.set_caption("Random Music Synthesis")
+        pygame.display.set_caption("Pytchie - Random Music Synthesis")
         self.print_font = pygame.font.SysFont("myriad", int(20*SCALE_X))
         self.most_recent_print = ""
         self.print_text = self.most_recent_print
@@ -32,6 +32,8 @@ class MusGUI(object):
         self.title_font = pygame.font.SysFont("myriad", int(30*SCALE_X))
         texts = ["LEAD", "BASS", "COMP", "PERC", "MIX"]
         self.titles = [self.title_font.render(text, 1, (200, 200, 200)) for text in texts]
+        link_font = pygame.font.SysFont("myriad", int(20*SCALE_X))
+        self.link = link_font.render("github.com/jeremycryan/pytchie", 1, (120, 120, 120))
 
         self.main()
 
@@ -50,6 +52,9 @@ class MusGUI(object):
         self.screen.blit(self.titles[1], (int(0.08 * FRAME_WIDTH), int(BASS_Y * FRAME_HEIGHT)))
         self.screen.blit(self.titles[3], (int(0.08 * FRAME_WIDTH), int(SNARE_Y * FRAME_HEIGHT)))
         self.screen.blit(self.titles[2], (int(0.08 * FRAME_WIDTH), int(COMP_Y * FRAME_HEIGHT)))
+        self.screen.blit(self.link,
+            (int(0.63 * FRAME_WIDTH),
+            int(0.85*FRAME_HEIGHT)))
 
     def main(self):
 
@@ -57,8 +62,8 @@ class MusGUI(object):
         self.click = False
         lead_text = 0
 
-        generate = Button(pos=(0.83, 0.88), text="GENERATE")
-        randomize = Button(pos=(0.63, MIX_Y), text="RANDOMIZE")
+        generate = Button(pos=(0.83, 0.925), text="GENERATE")
+        randomize = Button(pos=(0.66, MIX_Y + MIX_SPACING_Y/2), text="RANDOMIZE")
 
         tempo = Gauge(pos=(0.2, MIX_Y), label="TEMPO", min_val = 60, max_val = 180, starting_val = 120, size = (0.383, 0.05))
         chord_1 = ModeButton(size = (0.11, 0.05), pos=(0.2 + 0*MIX_SPACING_X, MIX_Y + MIX_SPACING_Y),
@@ -72,16 +77,16 @@ class MusGUI(object):
 
         lead_instrument_button = ModeButton(pos=(0.2, LEAD_Y+LEAD_SPACING), texts = ["RANDOM", "FLUTE", "TRUMPET", "VIOLIN", "SNARE"])
         lead_enable = ToggleButton(pos = (0.2, LEAD_Y))
-        lead_intricacy = Gauge(pos=(0.38, LEAD_Y), size=(0.4, 0.05), bar_color = BLUE, label = "INTRICACY", starting_val=0.7)
-        lead_temerity = Gauge(pos = (0.38, LEAD_Y+LEAD_SPACING), size=(0.4, 0.05), bar_color = BLUE, label = "TEMERITY", starting_val=0.7)
+        lead_intricacy = Gauge(pos=(0.38, LEAD_Y), size=(0.5, 0.05), bar_color = BLUE, label = "INTRICACY", starting_val=0.7)
+        lead_temerity = Gauge(pos = (0.38, LEAD_Y+LEAD_SPACING), size=(0.5, 0.05), bar_color = BLUE, label = "TEMERITY", starting_val=0.7)
 
         bass_enable = ToggleButton(pos = (0.2, BASS_Y))
         bass_instrument_button = ModeButton(pos=(0.2, BASS_Y+LEAD_SPACING), texts = ["RANDOM", "SAWTOOTH", "SQUARE"])
-        bass_intricacy = Gauge(pos=(0.38, BASS_Y), size=(0.4, 0.05), bar_color = BLUE, label = "INTRICACY", starting_val=0.3)
-        bass_temerity = Gauge(pos = (0.38, BASS_Y+BASS_SPACING), size=(0.4, 0.05), bar_color = BLUE, label = "TEMERITY", starting_val=0.3)
+        bass_intricacy = Gauge(pos=(0.38, BASS_Y), size=(0.5, 0.05), bar_color = BLUE, label = "INTRICACY", starting_val=0.3)
+        bass_temerity = Gauge(pos = (0.38, BASS_Y+BASS_SPACING), size=(0.5, 0.05), bar_color = BLUE, label = "TEMERITY", starting_val=0.3)
 
         snare_enable = ToggleButton(pos = (0.2, SNARE_Y))
-        snare_intricacy = Gauge(pos=(0.38, SNARE_Y), size=(0.4, 0.05), bar_color = BLUE, label = "INTRICACY", starting_val=0.5)
+        snare_intricacy = Gauge(pos=(0.38, SNARE_Y), size=(0.5, 0.05), bar_color = BLUE, label = "INTRICACY", starting_val=0.5)
 
         comp_enable = ToggleButton(pos = (0.2, COMP_Y))
         comp_instrument_button = ModeButton(pos=(0.38, COMP_Y), texts = ["RANDOM", "FLUTE", "TRUMPET", "VIOLIN"])
@@ -122,9 +127,11 @@ class MusGUI(object):
 
             self.check_events()
             self.screen.fill((50, 50, 50))
-            bot_bar = pygame.Surface((FRAME_WIDTH, int(FRAME_HEIGHT*0.15)))
+            bot_bar = pygame.Surface((FRAME_WIDTH, int(FRAME_HEIGHT*0.10)))
             self.screen.blit(bot_bar, (0, FRAME_HEIGHT - bot_bar.get_height()))
             bot_bar.fill((0, 0, 0))
+
+
             self.gui_print()
 
 
@@ -140,6 +147,12 @@ class MusGUI(object):
 
             self.draw_titles()
 
+            if to_generate:
+                black = pygame.Surface((FRAME_WIDTH, int(FRAME_HEIGHT*0.9)))
+                black.fill((0, 0, 0))
+                black.set_alpha(100)
+                self.screen.blit(black, (0, 0))
+                self.bleeps = []
 
             screen = pygame.transform.scale(self.screen, WINDOW_SIZE)
             self.screen_commit.blit(screen, (0, 0))
@@ -147,10 +160,14 @@ class MusGUI(object):
             pygame.display.flip()
 
             if to_generate:
-
                 lead_instrument = a.label_to_instrument[lead_instrument_button.texts[lead_instrument_button.mode]]
                 comp_instrument = a.label_to_instrument[comp_instrument_button.texts[comp_instrument_button.mode]]
                 enables = [lead_enable.toggled, snare_enable.toggled, bass_enable.toggled, comp_enable.toggled]
+                # t = threading.Thread(name="generate_audio", target=a.generate_preset_0,
+                #     kwargs={"lead_instrument": lead_instrument,
+                #     "comp_instrument": comp_instrument,
+                #     "enables": enables})
+                #TODO make this non-blocking, but also not take 40 seconds
                 a.generate_preset_0(lead_instrument = lead_instrument, comp_instrument = comp_instrument, enables = enables)
                 self.gui_print_text("test.wav generated and ready for playback.")
 
