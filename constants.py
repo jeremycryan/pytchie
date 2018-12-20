@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+
+SAMPLE_RATE = 44100
+
+##########################################################
+# --------------------- GUI STUFF -----------------------#
+##########################################################
+
+WINDOW_WIDTH = 640
+WINDOW_HEIGHT = 480
+WINDOW_SIZE = [WINDOW_WIDTH, WINDOW_HEIGHT]
+
+FRAME_WIDTH = 1280
+FRAME_HEIGHT = 960
+FRAME_SIZE = [FRAME_WIDTH, FRAME_HEIGHT]
+SCALE_X = 1.0*FRAME_WIDTH/WINDOW_WIDTH
+SCALE_Y = 1.0*FRAME_HEIGHT/WINDOW_HEIGHT
+
+RED = (220, 50, 70)
+BLUE = (80, 130, 240)
+GREEN = (80, 180, 90)
+YELLOW = (190, 175, 90)
+PURPLE = (140, 90, 220)
+ORANGE = (200, 120, 60)
+CYAN = (60, 160, 165)
+PINK = (210, 70, 210)
+
+
+COLORS = [RED, BLUE, YELLOW, PURPLE, ORANGE, CYAN, PINK]
+
+LEAD_Y = 0.27
+LEAD_SPACING = 0.07
+
+BASS_Y = 0.44
+BASS_SPACING = 0.07
+
+MIX_Y = 0.1
+MIX_SPACING_Y = 0.07
+MIX_SPACING_X = 0.1
+
+SNARE_Y = 0.61
+
+COMP_Y = 0.71
+COMP_SPACING = 0.07
