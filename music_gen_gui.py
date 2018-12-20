@@ -24,15 +24,15 @@ class MusGUI(object):
         self.screen_commit = pygame.display.set_mode(WINDOW_SIZE)
         self.screen = pygame.Surface(FRAME_SIZE)
         pygame.display.set_caption("Pytchie - Random Music Synthesis")
-        self.print_font = pygame.font.SysFont("myriad", int(20*SCALE_X))
+        self.print_font = pygame.font.Font(fp("Myriad.otf"), int(20*SCALE_X))
         self.most_recent_print = ""
         self.print_text = self.most_recent_print
         self.most_recent_print_time = ""
 
-        self.title_font = pygame.font.SysFont("myriad", int(30*SCALE_X))
+        self.title_font = pygame.font.Font(fp("Myriad.otf"), int(30*SCALE_X))
         texts = ["LEAD", "BASS", "COMP", "PERC", "MIX"]
         self.titles = [self.title_font.render(text, 1, (200, 200, 200)) for text in texts]
-        link_font = pygame.font.SysFont("myriad", int(20*SCALE_X))
+        link_font = pygame.font.Font(fp("Myriad.otf"), int(20*SCALE_X))
         self.link = link_font.render("github.com/jeremycryan/pytchie", 1, (120, 120, 120))
 
         self.main()
@@ -228,7 +228,7 @@ class Button(object):
         self.h = int(self.height * FRAME_HEIGHT)
 
         self.text = text
-        self.button_font = pygame.font.SysFont("myriad", int(20*SCALE_X))
+        self.button_font = pygame.font.Font(fp("Myriad.otf"), int(20*SCALE_X))
         self.button_font_render = self.button_font.render(self.text, 1, (0, 0, 0))
         self.brr_w = self.button_font_render.get_width()
         self.brr_h = self.button_font_render.get_height()
@@ -410,7 +410,7 @@ class Gauge(object):
         self.scale = 1.0
         self.target_scale = 1.0
         self.h_scale = 1.03
-        label_font=  pygame.font.SysFont("myriad", int(20*SCALE_X))
+        label_font=  pygame.font.Font(fp("Myriad.otf"), int(20*SCALE_X))
         self.label = label_font.render(label, 1, self.meter_text_color)
 
     def randomize_value(self):

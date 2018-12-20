@@ -253,7 +253,7 @@ class Sample(object):
 
     def write_to_file(self, filename):
         data = self.get_data_as_array()
-        wv.write(filename, SAMPLE_RATE, data)
+        wv.write(fp(filename), SAMPLE_RATE, data)
 
 
 if __name__ == '__main__':
