@@ -14,4 +14,6 @@ The following songs were generated using Pytchie. You can view the settings used
 
 To generate your own music, [download the Windows executable](https://github.com/jeremycryan/pytchie/blob/master/win_executable.zip?raw=true), extract it, and run music_gen_gui.exe.
 
+The program will generate a song based on your parameters and save it to a "Pytchie output" folder as a WAV file. You can then play it, modify it, or move it elsewhere. **Be careful; Pychie will overwrite the output the next time you generate a song unless you rename or move it.**
+
 ![Screenshot of pytchie](https://github.com/jeremycryan/pytchie/blob/master/examples/bounce.png?raw=true)
