@@ -1,0 +1,5 @@
+# Output WAV files
+python_files/output
+
+# Compiled python files
+*/pyc

@@ -7,13 +7,8 @@ from sound_generation import *
 from constants import *
 from helpers import *
 import random as rd
-
 import time
 import sys
-
-
-
-
 
 class MusGUI(object):
 

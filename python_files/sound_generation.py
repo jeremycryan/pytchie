@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 
-from math import sin, pi
+import os
 import random as rd
 import wave as wv
 import numpy as np
-import os
+from math import sin, pi
 from constants import *
 from helpers import *
 
-################################################################################
-# ------------------------ ENVELOPE OBJECT ----------------------------------- #
-################################################################################
 
 class Envelope(object):
 
@@ -28,7 +25,7 @@ class Envelope(object):
 
     def copy(self):
         return Envelope(self.attack, self.decay, self.sustain,
-            self.release, self.sustain_vol)
+                        self.release, self.sustain_vol)
 
     def get_level(self, time):
         #   Returns a level, with maximum volume 1.0, based on adsr envelope.
@@ -39,7 +36,7 @@ class Envelope(object):
             thru = time/self.attack
             level = thru
         elif time <= self.attack + self.decay:
-            thru = (time - self.attack)/(self.decay)
+            thru = (time - self.attack)/self.decay
             level = 1 - thru*(1 - self.sustain_vol)
         elif time <= self.attack + self.decay + self.sustain:
             level = self.sustain_vol
@@ -49,9 +46,6 @@ class Envelope(object):
 
         return level
 
-################################################################################
-# ---------------------------- WAVE OBJECT ----------------------------------- #
-################################################################################
 
 class Wave(object):
 
@@ -73,17 +67,19 @@ class Wave(object):
 
         return 1
 
+
 class SquareWave(Wave):
 
-    def __init__(self, duty_cycle = 0.5):
+    def __init__(self, duty_cycle=0.5):
         Wave.__init__(self)
         self.duty_cycle = duty_cycle
 
     def wave_func(self, through_period):
-        if through_period%1 < self.duty_cycle:
+        if through_period % 1 < self.duty_cycle:
             return 1
         else:
             return -1
+
 
 class SawWave(Wave):
 
@@ -95,6 +91,7 @@ class SawWave(Wave):
         amp = 1.0 - thru*2
         return amp
 
+
 class SineWave(Wave):
 
     def __init__(self):
@@ -104,6 +101,7 @@ class SineWave(Wave):
         amp = sin(through_period * 2 * pi)
         return amp
 
+
 class Noise(Wave):
 
     def __init__(self):
@@ -112,6 +110,7 @@ class Noise(Wave):
     def wave_func(self, through_period):
         amp = rd.random() - 0.5
         return amp * 0.3
+
 
 class Trumpet(Wave):
 
@@ -124,16 +123,17 @@ class Trumpet(Wave):
         amt = through_period * 2 * pi
 
         ot0 = sin(amt)
-        ot1 = sin((amt*2)%(2*pi))
-        ot2 = sin((amt*3)%(2*pi))
-        ot3 = sin((amt*4)%(2*pi))
-        ot4 = sin((amt*5)%(2*pi))
-        ot5 = sin((amt*6)%(2*pi))
-        ot6 = sin((amt*7)%(2*pi))
-        ot7 = sin((amt*8)%(2*pi))
-        ot8 = sin((amt*9)%(2*pi))
+        ot1 = sin((amt*2) % (2*pi))
+        ot2 = sin((amt*3) % (2*pi))
+        ot3 = sin((amt*4) % (2*pi))
+        ot4 = sin((amt*5) % (2*pi))
+        ot5 = sin((amt*6) % (2*pi))
+        ot6 = sin((amt*7) % (2*pi))
+        ot7 = sin((amt*8) % (2*pi))
+        ot8 = sin((amt*9) % (2*pi))
 
         return (0.65*ot0 + 0.4*ot1 + 0.45*ot2 + ot3 + 0.35*ot4 + 0.65*ot5 + 0.25*ot6 + 0.1*ot7 + 0.05*ot8)*0.5
+
 
 class Flute(Wave):
 
@@ -146,15 +146,16 @@ class Flute(Wave):
         amt = through_period * 2 * pi
 
         ot0 = sin(amt)
-        ot1 = sin((amt*2)%(2*pi))
-        ot2 = sin((amt*3)%(2*pi))
-        ot3 = sin((amt*4)%(2*pi))
-        ot4 = sin((amt*5)%(2*pi))
-        ot5 = sin((amt*6)%(2*pi))
-        ot6 = sin((amt*7)%(2*pi))
-        ot7 = sin((amt*8)%(2*pi))
+        ot1 = sin((amt*2) % (2*pi))
+        ot2 = sin((amt*3) % (2*pi))
+        ot3 = sin((amt*4) % (2*pi))
+        ot4 = sin((amt*5) % (2*pi))
+        ot5 = sin((amt*6) % (2*pi))
+        ot6 = sin((amt*7) % (2*pi))
+        ot7 = sin((amt*8) % (2*pi))
 
-        return (1.0*ot0 + 1.0*ot1 + 0.15*ot2 + 0.25*ot3 + 0.2*ot4 + 0.04*ot5 + 0.03*ot6 + 0.02*ot7)
+        return 1.0*ot0 + 1.0*ot1 + 0.15*ot2 + 0.25*ot3 + 0.2*ot4 + 0.04*ot5 + 0.03*ot6 + 0.02*ot7
+
 
 class Violin(Wave):
 
@@ -167,24 +168,20 @@ class Violin(Wave):
         amt = through_period * 2 * pi
 
         ot0 = sin(amt)
-        ot1 = sin((amt*2)%(2*pi))
-        ot2 = sin((amt*3)%(2*pi))
-        ot3 = sin((amt*4)%(2*pi))
-        ot4 = sin((amt*5)%(2*pi))
-        ot5 = sin((amt*6)%(2*pi))
-        ot6 = sin((amt*7)%(2*pi))
-        ot7 = sin((amt*8)%(2*pi))
+        ot1 = sin((amt*2) % (2*pi))
+        ot2 = sin((amt*3) % (2*pi))
+        ot3 = sin((amt*4) % (2*pi))
+        ot4 = sin((amt*5) % (2*pi))
+        ot5 = sin((amt*6) % (2*pi))
+        ot6 = sin((amt*7) % (2*pi))
+        ot7 = sin((amt*8) % (2*pi))
 
-        return (1.0*ot0 + 0.6*ot1 + 0.6*ot2 + 0.7*ot3 + 0.5*ot4 + 0.25*ot5 + 0.5*ot6 + 0.2*ot7)
+        return 1.0*ot0 + 0.6*ot1 + 0.6*ot2 + 0.7*ot3 + 0.5*ot4 + 0.25*ot5 + 0.5*ot6 + 0.2*ot7
 
-
-################################################################################
-# --------------------------- VOICE OBJECT ----------------------------------- #
-################################################################################
 
 class Voice(object):
 
-    def __init__(self, envelope, wave, volume = 1.0):
+    def __init__(self, envelope, wave, volume=1.0):
         self.envelope = envelope
         self.wave = wave
         self.freq_to_tone = {}
@@ -205,7 +202,6 @@ class Voice(object):
         num_samples = int(length * SAMPLE_RATE)
         sample_time = 1.0/SAMPLE_RATE
 
-
         for i in range(num_samples):
             t = i * sample_time
             self.wave.frequency = frequency + vibrato_amp * sin(2*pi/vibrato_per*t)
@@ -213,19 +209,12 @@ class Voice(object):
             env_amp = self.envelope.get_level(t)
             samples.append(wave_amp*env_amp*self.volume)
 
-        #samples = np.asarray(samples).astype(np.float32)
-
         self.freq_to_tone[frequency] = samples
 
         return samples
 
-################################################################################
-# ---------------------------- SAMPLE OBJECT --------------------------------- #
-################################################################################
 
 class Sample(object):
-    # This class pretty much just adds up a bunch of tones into one big playable
-    # list
 
     def __init__(self, length):
         self.length = length
@@ -253,28 +242,18 @@ class Sample(object):
         return np.asarray(self.data).astype(np.int16)
 
     def write_to_file(self, filename):
+
+        #   Make output directory if it doesn't exist
+        output_dir = "output"
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+
         data = self.get_data_as_array()
-        path = fp(os.path.join("output", filename))
+        path = fp(os.path.join(output_dir, filename))
+
         wavefile = wv.open(path, mode="wb")
         wavefile.setnchannels(1)
         wavefile.setsampwidth(2)
         wavefile.setframerate(SAMPLE_RATE)
         wavefile.writeframes(data)
         wavefile.close()
-        #import scipy.io.wavfile as wv
-        #wv.write(fp(os.path.join("output", filename)), SAMPLE_RATE, data)
-
-
-if __name__ == '__main__':
-    env_0 = Envelope(0.05, 0.1, 0.10, 0.2, 0.1)
-    sinewave = SineWave()
-    a = Voice(env_0, sinewave)
-    b = Sample(2)
-    sound = a.generate_tone(220)
-    b.add_tone(sound, 1)
-    sound2 = a.generate_tone(440)
-    b.add_tone(sound2, 1.2)
-    sound3 = a.generate_tone(880)
-    b.add_tone(sound3, 1.4)
-    b.write_to_file("test.wav")
-    os.system("aplay test.wav")
