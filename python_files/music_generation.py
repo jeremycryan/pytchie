@@ -4,6 +4,8 @@ import time
 from sound_generation import *
 from helpers import *
 
+from python_files.file_utils import generate_next_file_name
+
 major_scale = [0, 2, 4, 5, 7, 9, 11]
 
 MAJOR_CHORDS = {
@@ -478,7 +480,8 @@ class Song(object):
             if enables[3]:
                 self.comping(t_init=self.double_time*(i+1), seed=[None, comp_instrument, None, None, None])
 
-        self.sample.write_to_file("test.wav")
+        file_to_write = generate_next_file_name("test_", "wav")
+        self.sample.write_to_file(file_to_write)
 
 
 if __name__ == '__main__':

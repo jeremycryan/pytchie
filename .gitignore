@@ -3,3 +3,7 @@ python_files/output
 
 # Compiled python files
 */pyc
+__pycache__
+
+# PyCharm, some other build stuff
+.idea
