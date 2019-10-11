@@ -163,8 +163,8 @@ class MusGUI(object):
                 #     "comp_instrument": comp_instrument,
                 #     "enables": enables})
                 #TODO make this non-blocking, but also not take 40 seconds
-                a.generate_preset_0(lead_instrument = lead_instrument, comp_instrument = comp_instrument, enables = enables)
-                self.gui_print_text("test.wav generated and ready for playback.")
+                file_name = a.generate_preset_0(lead_instrument = lead_instrument, comp_instrument = comp_instrument, enables = enables)
+                self.gui_print_text("%s generated and ready for playback." % file_name)
 
 
     def check_events(self):
