@@ -1,5 +1,10 @@
 # Output WAV files
 python_files/output
 
+# Pyinstaller outputs
+build/
+dist/
+music_gen_gui.spec
+
 # Compiled python files
 */pyc
