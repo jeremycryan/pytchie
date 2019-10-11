@@ -4,9 +4,13 @@ import os
 import random as rd
 import wave as wv
 import numpy as np
+
 from math import sin, pi
 from constants import *
+
 from helpers import *
+
+from file_utils import create_output_dir_if_needed
 
 
 class Envelope(object):
@@ -242,11 +246,7 @@ class Sample(object):
         return np.asarray(self.data).astype(np.int16)
 
     def write_to_file(self, filename):
-
-        #   Make output directory if it doesn't exist
-        output_dir = "output"
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
+        output_dir = create_output_dir_if_needed()
 
         data = self.get_data_as_array()
         path = fp(os.path.join(output_dir, filename))

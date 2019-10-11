@@ -8,3 +8,7 @@ music_gen_gui.spec
 
 # Compiled python files
 */pyc
+__pycache__
+
+# PyCharm, some other build stuff
+.idea
