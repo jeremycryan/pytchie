@@ -82,21 +82,21 @@ class Rhythm(object):
                 res += self.generate_subbeat(depth=self.beat_depth - 1)
         else:
             if rd.random() < self.fullness:
-                res += ("n%s" % (2**self.beat_depth))
+                res += ("n%s" % (2 ** self.beat_depth))
             else:
-                res += ("r%s" % (2**self.beat_depth))
+                res += ("r%s" % (2 ** self.beat_depth))
         return res
 
     def generate_subbeat(self, depth=1):
 
         num = rd.random()
         if num < self.intricacy and depth >= 1:
-            return self.generate_subbeat(depth-1) + self.generate_subbeat(depth-1)
+            return self.generate_subbeat(depth - 1) + self.generate_subbeat(depth - 1)
         else:
             if rd.random() < self.fullness:
-                return "n%s" % (2**depth)
+                return "n%s" % (2 ** depth)
             else:
-                return "r%s" % (2**depth)
+                return "r%s" % (2 ** depth)
 
 
 class Riff(object):
@@ -104,9 +104,11 @@ class Riff(object):
     def __init__(self, key=69,
                  scale=major_scale, temerity=0.8,
                  rhythm=None, max_run=5, max_jump=5,
-                 bump_up=None):
+                 bump_up=None,
+                 progress_callback=lambda: ""):
 
         self.key = key
+        self.progress_callback = progress_callback
         self.scale = scale
         self.temerity = temerity  # Higher makes it stray farther from center note, range 0-1
         self.last_note = key
@@ -165,7 +167,7 @@ class Riff(object):
                 self.cur_idx = 0
                 self.cur_octave += 1
 
-        new_note = self.key + 12*self.cur_octave + self.scale[int(self.cur_idx)]
+        new_note = self.key + 12 * self.cur_octave + self.scale[int(self.cur_idx)]
         self.last_note = new_note
         self.add_note(new_note)
 
@@ -173,7 +175,7 @@ class Riff(object):
         """ Runs within a scale for a random distance"""
 
         max_distance = self.max_run
-        distance = rd.choice(range(1, max_distance+1))
+        distance = rd.choice(range(1, max_distance + 1))
         direction = rd.choice([-1, 1])
 
         if self.return_to_origin():
@@ -184,6 +186,7 @@ class Riff(object):
 
         for i in range(distance):
 
+            self.progress_callback()
             self.cur_idx += direction
 
             if self.cur_idx < 0:
@@ -194,12 +197,11 @@ class Riff(object):
                 self.cur_idx = 0
                 self.cur_octave += 1
 
-            new_note = self.key + 12*self.cur_octave + self.scale[int(self.cur_idx)]
+            new_note = self.key + 12 * self.cur_octave + self.scale[int(self.cur_idx)]
             self.last_note = new_note
             self.add_note(new_note)
 
     def generate(self):
-
         if self.bump_up:
             for note in self.bump_up.notes:
                 chord = self.scale
@@ -214,7 +216,7 @@ class Riff(object):
                     new_idx = rd.choice(range(chord_width))
                 new_note = chord[new_idx]
                 self.last_note = new_note
-                self.add_note(new_note+self.key + 12*self.cur_octave)
+                self.add_note(new_note + self.key + 12 * self.cur_octave)
                 if overwide:
                     self.cur_octave -= 1
             return
@@ -231,6 +233,7 @@ class Riff(object):
         beats = self.rhythm.beats
 
         for i, tone in enumerate(self.notes):
+            self.progress_callback()
             if len(beats) <= 1:
                 break
             while beats[0] == "r":
@@ -253,8 +256,8 @@ class Riff(object):
 class Song(object):
 
     def __init__(self, length, bpm, lead_intricacy=0.7, lead_temerity=0.7,
-                 bass_intricacy=0.3, bass_temerity=0.3, chords=("RAND",)*4,
-                 snare_intricacy=0.5):
+                 bass_intricacy=0.3, bass_temerity=0.3, chords=("RAND",) * 4,
+                 snare_intricacy=0.5, progress_callback=lambda: ""):
 
         chords = list(chords)
         self.sinewave = SineWave()
@@ -264,6 +267,7 @@ class Song(object):
         self.violin = Violin()
         self.noise = Noise()
         self.square = SquareWave()
+        self.progress_callback = progress_callback
         self.instruments = [self.flute, self.trumpet, self.violin, self.noise]
 
         self.label_to_instrument = {"FLUTE": self.flute,
@@ -278,20 +282,20 @@ class Song(object):
         # TODO make "RAND" not go to the same chord each generation
 
         self.set_tempo(bpm)
-        mrt = self.mdv_length/0.15
+        mrt = self.mdv_length / 0.15
 
-        self.instrument_envelopes = {self.violin: Envelope(0.1, 0.15*mrt, 0.1*mrt, 0.1*mrt, 0.5),
-                                     self.flute: Envelope(0.07, 0.15*mrt, 0.15*mrt, 0.1*mrt, 0.4),
-                                     self.trumpet: Envelope(0.05, 0.15*mrt, 0.1*mrt, 0.1*mrt, 0.5),
-                                     self.noise: Envelope(0.05, 0.07, 0.06, 0.1*mrt, 0.2)}
+        self.instrument_envelopes = {self.violin: Envelope(0.1, 0.15 * mrt, 0.1 * mrt, 0.1 * mrt, 0.5),
+                                     self.flute: Envelope(0.07, 0.15 * mrt, 0.15 * mrt, 0.1 * mrt, 0.4),
+                                     self.trumpet: Envelope(0.05, 0.15 * mrt, 0.1 * mrt, 0.1 * mrt, 0.5),
+                                     self.noise: Envelope(0.05, 0.07, 0.06, 0.1 * mrt, 0.2)}
 
         self.length = length
 
         self.key = rd.choice(range(12)) + 60
         self.changes = [self.chord_to_idx[chord] for chord in chords]
         self.bars_per_chord = 2
-        self.double_time = self.mdv_length*4*4*self.bars_per_chord * len(self.changes)
-        self.sample = Sample(self.length*self.double_time+0.5)
+        self.double_time = self.mdv_length * 4 * 4 * self.bars_per_chord * len(self.changes)
+        self.sample = Sample(self.length * self.double_time + 0.5)
 
         self.lead_intricacy = lead_intricacy
         self.lead_temerity = lead_temerity
@@ -301,16 +305,17 @@ class Song(object):
 
         self.snare_intricacy = snare_intricacy
 
-    def bassline(self, t_init = 0):
+    def bassline(self, t_init=0):
         bass_envelope = Envelope(0.05, 0.15, 0.2, 0.15, 0.2)
         voice = rd.choice([self.sawtooth, self.square])
         bass = Voice(bass_envelope, voice, volume=0.2)
-        bass_rhythms = [Rhythm(self.bars_per_chord*2, intricacy=self.bass_intricacy, fullness=1)]
+        bass_rhythms = [Rhythm(self.bars_per_chord * 2, intricacy=self.bass_intricacy, fullness=1)]
         bass_riffs = [Riff(scale=BASS_CHORDS[chord],
-                      rhythm=rd.choice(bass_rhythms), key=self.key-12*3,
-                      temerity=self.bass_temerity, max_run=1) for chord in self.changes]
+                           rhythm=rd.choice(bass_rhythms), key=self.key - 12 * 3,
+                           temerity=self.bass_temerity, max_run=1) for chord in self.changes]
 
-        for chord in bass_riffs*2:
+        for chord in bass_riffs * 2:
+            self.progress_callback()
             chord.add_to_sample(self.sample, bass, t_init, mdv_length=self.mdv_length)
             t_init += self.mdv_length * 4 * len(self.changes)
 
@@ -318,15 +323,16 @@ class Song(object):
         snare_envelope = Envelope(0.02, 0.05, 0.1, 0.05, 0.1)
         snare = Voice(snare_envelope, self.noise, volume=2.0)
 
-        snare_rhythm = Rhythm(self.bars_per_chord*2, intricacy=self.snare_intricacy)
+        snare_rhythm = Rhythm(self.bars_per_chord * 2, intricacy=self.snare_intricacy)
         snare_riff = Riff(rhythm=snare_rhythm)
 
         t = t_init
-        for _ in self.changes*2:
+        for _ in self.changes * 2:
+            self.progress_callback()
             snare_riff.add_to_sample(self.sample, snare, t, mdv_length=self.mdv_length)
             t += self.mdv_length * 4 * len(self.changes)
 
-    def lead_line(self, t_init=0, seed=(None,)*4):
+    def lead_line(self, t_init=0, seed=(None,) * 4):
 
         #   Choose a random voice; if seeded, instead choose seed
         seed = list(seed)
@@ -341,8 +347,8 @@ class Song(object):
 
         #   Generate possible measure-long rhythms for lead line.
         #   TODO randomize number of rhythms in lead_rhythms
-        rhythm_0 = Rhythm(self.bars_per_chord*2, intricacy=self.lead_intricacy)
-        rhythm_1 = Rhythm(self.bars_per_chord*2, intricacy=self.lead_intricacy)
+        rhythm_0 = Rhythm(self.bars_per_chord * 2, intricacy=self.lead_intricacy)
+        rhythm_1 = Rhythm(self.bars_per_chord * 2, intricacy=self.lead_intricacy)
 
         if seed[1]:
             played_rhythms = seed[1]
@@ -359,33 +365,36 @@ class Song(object):
                                bump_up=seed[3][i],
                                temerity=self.lead_temerity,
                                key=self.key, max_run=3,
-                               max_jump=3) for i in range(len(self.changes))]
+                               max_jump=3,
+                               progress_callback=self.progress_callback) for i in range(len(self.changes))]
         else:
-            lead_riffs = [Riff(scale = MAJOR_CHORDS[self.changes[i]],
+            lead_riffs = [Riff(scale=MAJOR_CHORDS[self.changes[i]],
                                rhythm=played_rhythms[i],
-                               temerity = self.lead_temerity,
+                               temerity=self.lead_temerity,
                                key=self.key,
                                max_run=3,
-                               max_jump=3) for i in range(len(self.changes))]
+                               max_jump=3,
+                               progress_callback=self.progress_callback) for i in range(len(self.changes))]
 
         t = t_init
-        for riff in lead_riffs*2:
+        for riff in lead_riffs * 2:
+            self.progress_callback()
             riff.add_to_sample(self.sample, lead, t, mdv_length=self.mdv_length)
             t += self.mdv_length * 4 * len(self.changes)
 
         seed = [lead_instrument, played_rhythms, lead_riffs, None]
         return seed
 
-    def comping(self, t_init=0, seed = (None,)*5):
+    def comping(self, t_init=0, seed=(None,) * 5):
 
         seed = list(seed)
         if seed[4]:
             brass_rhythm = seed[4]
         else:
-            brass_rhythm = Rhythm(self.bars_per_chord*2, intricacy=0)
+            brass_rhythm = Rhythm(self.bars_per_chord * 2, intricacy=0)
 
         #   Instantiate
-        brass_envelope = Envelope(0.15, 0.2, self.bars_per_chord*6*self.mdv_length, 0.1, 0.3)
+        brass_envelope = Envelope(0.15, 0.2, self.bars_per_chord * 6 * self.mdv_length, 0.1, 0.3)
         short_brass_envelope = Envelope(0.05, 0.1, 0.1, 0.05, 0.3)
         long_brass = Voice(brass_envelope, self.trumpet, volume=0.3)
         short_brass = Voice(short_brass_envelope, self.trumpet, volume=0.5)
@@ -404,7 +413,7 @@ class Song(object):
         if seed[2]:
             brass_notes = seed[2]
         else:
-            brass_notes = [[chord_voice.generate_tone(midi_to_freq(self.key-12+i))
+            brass_notes = [[chord_voice.generate_tone(midi_to_freq(self.key - 12 + i))
                             for i in MAJOR_TRIADS[chord]]
                            for chord in self.changes]
 
@@ -416,13 +425,14 @@ class Song(object):
         t = 0
         i = 0
         lengths = []
-        while i < len(self.changes)*2:
-            if t >= (i+1)*self.mdv_length*4*len(self.changes):
-                t = (i+1)*self.mdv_length*4*len(self.changes)
+        while i < len(self.changes) * 2:
+            self.progress_callback()
+            if t >= (i + 1) * self.mdv_length * 4 * len(self.changes):
+                t = (i + 1) * self.mdv_length * 4 * len(self.changes)
                 i += 1
                 continue
-            for note in brass_notes[i%len(self.changes)]:
-                self.sample.add_tone(note, t+t_init)
+            for note in brass_notes[i % len(self.changes)]:
+                self.sample.add_tone(note, t + t_init)
             if seed[3]:
                 length = seed[3][0]
                 seed[3] = seed[3][1:]
@@ -436,16 +446,17 @@ class Song(object):
 
     def set_tempo(self, bpm):
 
-        mpb = 1.0/bpm   # minutes per beat
-        spb = mpb*60    # seconds per beat
-        spqb = spb/4    # seconds per quarter beat
+        mpb = 1.0 / bpm  # minutes per beat
+        spb = mpb * 60  # seconds per beat
+        spqb = spb / 4  # seconds per quarter beat
 
         self.mdv_length = spqb
 
     def draw_loading_bar(self, surf):
         pass
 
-    def generate_preset_0(self, lead_instrument=None, played_rhythms=None, lead_riffs=None, surf = None, enables=[1, 1, 1, 1], comp_instrument = None):
+    def generate_preset_0(self, lead_instrument=None, played_rhythms=None, lead_riffs=None, surf=None,
+                          enables=[1, 1, 1, 1], comp_instrument=None):
 
         now = time.time()
 
@@ -456,29 +467,30 @@ class Song(object):
         if enables[2]:
             self.bassline(t_init=0)
         if enables[3]:
-            self.comping(t_init=0, seed = [None, comp_instrument, None, None, None])
+            self.comping(t_init=0, seed=[None, comp_instrument, None, None, None])
 
-        for i in range(self.length-1):
+        for i in range(self.length - 1):
 
+            self.progress_callback()
             if enables[0]:
                 reseed = False
                 if rd.random() <= 0.4:
                     reseed = True
                     ls = [lead_instrument, None, None, None]
-                ls = self.lead_line(t_init=self.double_time*(i+1), seed=ls)
+                ls = self.lead_line(t_init=self.double_time * (i + 1), seed=ls)
 
                 while ls[0] == self.noise:
                     ls[0] = rd.choice(self.instruments)
 
                 if rd.random() < 0.6 and not reseed:
-                    self.lead_line(t_init=self.double_time*(i+1), seed=ls[:-2] + [None] + [ls[2]])
+                    self.lead_line(t_init=self.double_time * (i + 1), seed=ls[:-2] + [None] + [ls[2]])
 
             if enables[1]:
-                self.snare_line(t_init=self.double_time*(i+1))
+                self.snare_line(t_init=self.double_time * (i + 1))
             if enables[2]:
-                self.bassline(t_init=self.double_time*(i+1))
+                self.bassline(t_init=self.double_time * (i + 1))
             if enables[3]:
-                self.comping(t_init=self.double_time*(i+1), seed=[None, comp_instrument, None, None, None])
+                self.comping(t_init=self.double_time * (i + 1), seed=[None, comp_instrument, None, None, None])
 
         file_to_write = generate_next_file_name("test_", "wav")
         self.sample.write_to_file(file_to_write)
