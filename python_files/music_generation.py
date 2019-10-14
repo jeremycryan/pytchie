@@ -449,6 +449,8 @@ class Song(object):
 
         now = time.time()
 
+        print()
+
         if enables[0]:
             ls = self.lead_line(t_init=0, seed=[lead_instrument, played_rhythms, lead_riffs, None])
         if enables[1]:
