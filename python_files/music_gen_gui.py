@@ -6,9 +6,12 @@ from music_generation import *
 from sound_generation import *
 from constants import *
 from helpers import *
+import math
 import random as rd
 import time
+import threading
 import sys
+import random
 
 
 class MusGUI(object):
@@ -32,9 +35,9 @@ class MusGUI(object):
         self.link = link_font.render("github.com/jeremycryan/pytchie", 1, (120, 120, 120))
 
         self.spinner_sprite = SpinnerSprite(self.screen_commit)
-        #self.spinner_drawer = UpdaterThread("Spinner-Drawer-Thread", self.spinner_sprite)
-
-        #self.spinner_drawer.run()
+        self.last_spinner_draw = time.time()
+        self.loading = False
+        self.threads = []
 
         self.main()
 
@@ -61,7 +64,6 @@ class MusGUI(object):
 
         then = time.time()
         self.click = False
-        lead_text = 0
 
         generate = Button(pos=(0.83, 0.925), text="GENERATE")
         randomize = Button(pos=(0.66, MIX_Y + MIX_SPACING_Y / 2), text="RANDOMIZE")
@@ -116,18 +118,15 @@ class MusGUI(object):
 
             to_generate = False
             if generate in self.clicked:
-                self.show_spinner()
                 a = Song(4, tempo.value,
                          lead_intricacy=lead_intricacy.value,
                          lead_temerity=lead_temerity.value,
                          bass_intricacy=bass_intricacy.value,
                          bass_temerity=bass_temerity.value,
                          chords=chords,
-                         snare_intricacy=snare_intricacy.value,
-                         progress_callback=lambda: self.update_and_draw_spinner())
+                         snare_intricacy=snare_intricacy.value)
                 self.gui_print_text("Generating a sample song with your parameters...")
                 to_generate = 1
-
 
             if randomize in self.clicked:
                 self.gui_print_text("Random values assigned to all fields.")
@@ -169,24 +168,41 @@ class MusGUI(object):
                 lead_instrument = a.label_to_instrument[lead_instrument_button.texts[lead_instrument_button.mode]]
                 comp_instrument = a.label_to_instrument[comp_instrument_button.texts[comp_instrument_button.mode]]
                 enables = [lead_enable.toggled, snare_enable.toggled, bass_enable.toggled, comp_enable.toggled]
-                # t = threading.Thread(name="generate_audio", target=a.generate_preset_0,
-                #     kwargs={"lead_instrument": lead_instrument,
-                #     "comp_instrument": comp_instrument,
-                #     "enables": enables})
-                # TODO make this non-blocking, but also not take 40 seconds
-                file_name = a.generate_preset_0(lead_instrument=lead_instrument, comp_instrument=comp_instrument,
-                                                enables=enables)
-                self.gui_print_text("%s generated and ready for playback." % file_name)
+
+                self.loading = True
+                self.song_to_generate = a
+                self.generated_file_name = None
+                self.gen_args = {"lead_instrument": lead_instrument,
+                                 "comp_instrument": comp_instrument,
+                                 "enables": enables}
+                t = threading.Thread(target=self.generate_song)
+                t.start()
+                while threading.active_count() > 1:
+                    self.update_and_draw_spinner()
+                    self.check_for_pygame_exit()
+                self.loading = False
+                self.gui_print_text("%s generated and ready for playback." % self.generated_file_name)
                 self.hide_spinner()
 
-    def update_and_draw_spinner(self):
-        screen = pygame.transform.scale(self.screen, WINDOW_SIZE)
-        self.screen_commit.blit(screen, (0, 0))
+    def generate_song(self):
+        args = self.gen_args
+        self.generated_file_name = self.song_to_generate.generate_preset_0(**args)
+        sys.exit()  # Close current thread
 
-        self.spinner_sprite.update()
+    def update_and_draw_spinner(self):
+
+
+        screen = pygame.transform.scale(self.screen, WINDOW_SIZE)
+
+        now = time.time()
+        dt = now - self.last_spinner_draw
+        self.last_spinner_draw = now
+
+        self.screen_commit.blit(screen, (0, 0))
+        self.spinner_sprite.update(dt)
         self.spinner_sprite.draw()
 
-        pygame.display.update()
+        pygame.display.flip()
 
     def show_spinner(self):
         self.spinner_sprite.show()
@@ -194,18 +210,24 @@ class MusGUI(object):
     def hide_spinner(self):
         self.spinner_sprite.hide()
 
-    def check_events(self):
+    def check_for_pygame_exit(self):
         events = pygame.event.get()
-        mouse_pos = pygame.mouse.get_pos()
-
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()
+                self.close_all_threads()
+
+    def close_all_threads(self):
+        os._exit(1)
+
+    def check_events(self):
+        mouse_pos = pygame.mouse.get_pos()
 
         click = False
         old_click = self.click
         new_click = pygame.mouse.get_pressed()[0]
+
+        self.check_for_pygame_exit()
 
         self.clicked = []
         if new_click and not old_click:
@@ -224,43 +246,46 @@ class SpinnerSprite(object):
         super(SpinnerSprite, self).__init__()
         self.screen = screen
         self.images = []
-        self.slowdown = 0.5
-        for frame in range(1, 8):
-            self.images.append(pygame.image.load("images/spinner/frame-" + str(frame) + ".png"))
+        self.tps = 3.5              # Number of 30-degree tooth increments turned each second
+        self.pps = 1                # Number of scale pulses each second
+        self.age = 0
 
         self.visible = True
         self.index = 0
-        self.image = self.images[self.index]
-        self.spinner = pygame.image.load('images/spinner/frame-1.png')
+        self.spinner = pygame.image.load("images/spinner/frame-1.png")
 
-        self.spinner_x = (WINDOW_WIDTH * 0.32)
-        self.spinner_y = (WINDOW_HEIGHT * 0.32)
+        self.x = WINDOW_WIDTH/2
+        self.y = WINDOW_HEIGHT/2
+
+        self.pulse_amplitude = 0.08  # Proportion of scale increase with pulse
+        self.scale = 0               # Starting scale
 
     def show(self):
-        self.index = 0
+        self.age = 0
         self.visible = True
 
     def hide(self):
         self.visible = False
 
-    def update(self):
+    def update(self, dt):
         if not self.visible:
             return
 
-        self.index += 1
+        self.age += dt
 
-        print(self.index)
-
-        frame_id = int(self.index * self.slowdown)
-        if frame_id >= len(self.images):
-            frame_id = 0
-            self.index = 0
-        self.image = self.images[frame_id]
+        angle = (self.age * self.tps * 30) % 30
+        self.max_scale = self.age
+        self.scale = self.pulse_amplitude * math.sin(self.pps * 2 * math.pi * self.age) + 1
+        img = pygame.transform.rotozoom(self.spinner, -angle, min(self.scale, self.max_scale))
+        self.image = img
 
     def draw(self):
         if not self.visible:
             return
-        self.screen.blit(self.image, (self.spinner_x, self.spinner_y))
+
+        x = int(self.x - self.image.get_width()/2)
+        y = int(self.y - self.image.get_width()/2)
+        self.screen.blit(self.image, (x, y))
 
 
 class Bleep(object):
