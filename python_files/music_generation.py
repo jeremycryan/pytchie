@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import time
-from sound_generation import *
-from helpers import *
+from .sound_generation import *
+from .helpers import *
 
-from file_utils import generate_next_file_name
+from .file_utils import generate_next_file_name
 
 major_scale = [0, 2, 4, 5, 7, 9, 11]
 

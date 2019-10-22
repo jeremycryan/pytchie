@@ -6,11 +6,11 @@ import wave as wv
 import numpy as np
 
 from math import sin, pi
-from constants import *
+from .constants import *
 
-from helpers import *
+from .helpers import *
 
-from file_utils import create_output_dir_if_needed
+from .file_utils import create_output_dir_if_needed
 
 
 class Envelope(object):
