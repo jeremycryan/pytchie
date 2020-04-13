@@ -2,10 +2,10 @@
 
 import pygame
 
-from music_generation import *
-from sound_generation import *
-from constants import *
-from helpers import *
+from .music_generation import *
+from .sound_generation import *
+from .constants import *
+from .helpers import *
 import math
 import random as rd
 import time

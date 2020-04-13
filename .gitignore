@@ -1,4 +1,5 @@
 # Output WAV files
+output/
 python_files/output
 
 # Pyinstaller outputs
