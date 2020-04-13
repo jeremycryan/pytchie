@@ -7,7 +7,7 @@ dist/
 music_gen_gui.spec
 
 # Compiled python files
-*/pyc
+*.pyc
 __pycache__
 
 # PyCharm, some other build stuff

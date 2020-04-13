@@ -151,6 +151,8 @@ class MusGUI(object):
                     if item.radius > item.max_radius:
                         self.bleeps.remove(item)
 
+            self.draw_titles()
+
             if to_generate:
                 black = pygame.Surface((FRAME_WIDTH, int(FRAME_HEIGHT * 0.9)))
                 black.fill((0, 0, 0))
